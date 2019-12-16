@@ -1,0 +1,99 @@
+# NOTE: update this with your service name
+service: divinity
+
+# Use the serverless-webpack plugin to transpile ES6
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+# serverless-webpack configuration
+# Enable auto-packing of external modules
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: prod
+  region: us-east-2
+  memorySize: 128
+  timeout: 10
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:SendEmail"
+      Resource: "*"
+
+functions:
+  email:
+    handler: email.main
+    events:
+      - http:
+          path: email
+          method: post
+          cors: true
+  create:
+    handler: products.create
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: products
+          method: post
+          cors: true
+  getOne:
+    handler: products.getOne
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: products/{id}
+          method: get
+          cors: true
+  getAll:
+    handler: products.getAll
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: products
+          method: get
+          cors: true
+  update:
+    handler: products.update
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: products/{id}
+          method: put
+          cors: true
+  delete:
+    handler: products.delete
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: products/{id}
+          method: delete
+          cors: true
+  getAllStudentsByCity:
+    handler: products.getAllStudentsByCity
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: products/city/{id}
+          method: get
+          cors: true
+  getAllFacilitators:
+    handler: products.getAllFacilitators
+    environment:
+      DB: ${ssm:divinity}
+    events:
+      - http:
+          path: facilitators
+          method: get
+          cors: true
